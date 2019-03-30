@@ -3,7 +3,7 @@ import pygame
 
 pygame.init()
 
-win=pygame.display.set_mode((500,480))
+win=pygame.display.set_mode((700,480))
 pygame.display.set_caption("Goku Vs Goblins")
 #loading player images
 walkRight = [pygame.image.load('R1.png'), pygame.image.load('R2.png'), pygame.image.load('R3.png'), pygame.image.load('R4.png'), pygame.image.load('R5.png'), pygame.image.load('R6.png'), pygame.image.load('R7.png'), pygame.image.load('R8.png'), pygame.image.load('R9.png')]
@@ -11,7 +11,8 @@ walkLeft = [pygame.image.load('L1.png'), pygame.image.load('L2.png'), pygame.ima
 bg = pygame.image.load('bg111.jpg') #bg image
 char = pygame.image.load('standing.png')
 
-block = pygame.image.load('block1.png') 
+block = pygame.image.load('block1.png')
+dball = pygame.image.load('dballs.png')
 
 clk=pygame.time.Clock()             #clock for frame rates
 
@@ -69,7 +70,7 @@ class Player(object):
         self.walkCount = 0
         font1= pygame.font.SysFont("comicsansms" , 70)
         text1= font1.render("-5" , 1, (255,0,0))
-        win.blit(text1, (250 -(text1.get_width()/2),200))
+        win.blit(text1, (350 -(text1.get_width()/2),200))
         pygame.display.update()
         i=0                     #to hold the text for 1s
         while i< 100:
@@ -79,25 +80,6 @@ class Player(object):
                 if event.type== pygame.QUIT:
                     i=151
                     pygame.quit()
-
-    def decide(self,res):
-        if res==1:
-            font1= pygame.font.SysFont("comicansms" , 100)
-            text1= font1.render("Weehee! YOU WON!!!" , 1, (255,180,0))
-            win.blit(text1, (250 -(text1.get_width()/2),200))
-            i=0                     #to hold the text for 10s
-            while i< 300:
-                pygame.time.delay(10)
-                i+=1
-                #goback to menu
-        else:
-            font1= pygame.font.SysFont("Stencil Std" , 100, True)
-            text1= font1.render("Weehee! YOU LOSE!!!" , 1, (255,180,0))
-            win.blit(text1, (250 -(text1.get_width()/2),200))
-            i=0                     #to hold the text for 10s
-            while i< 300:
-                pygame.time.delay(10)
-                i+=1
     
 
     
@@ -194,12 +176,21 @@ class enemy(object):
 def redrawGameWindow():
     win.blit(bg, (0,0))
     block1.draw(win)
+    win.blit(dball, (600,410))
     text= font.render("Score: " + str(score) , 1, (94,43,102))
-    win.blit(text, (370,10))
+    win.blit(text, (500,10))
     man.draw(win)
     goblin.draw(win)
-
     
+    if not(goblin.visible) and man.x >= 600 and man.y == 410:       #if goblin dead and reached win point
+       font1= pygame.font.SysFont("comicansms" , 50)
+       text1= font1.render("Weehee! YOU WON!!!" , 1, (255,0,255))
+       win.blit(text1, (350 -(text1.get_width()/2),200))
+       
+    if score <= -15:
+        font1= pygame.font.SysFont("Stencil Std" , 50, True)
+        text1= font1.render("Awwwwhh! YOU LOSE!!!" , 1, (255,0,255))
+        win.blit(text1, (350 -(text1.get_width()/2),200))
     
     for bullet in bullets:
         bullet.draw(win)
@@ -209,7 +200,7 @@ def redrawGameWindow():
 #mainloop
 man = Player(40,410,64,64)
 bullets= []
-goblin = enemy(205,415,64,64,400)
+goblin = enemy(205,415,64,64,500)
 block1 = blocks(160,410)
 font = pygame.font.SysFont("Times New Roman",30, True)
 shootloop = 0
@@ -218,6 +209,7 @@ run=True
 while run:
     clk.tick(27)
 
+    
     #for man and block collision
     if man.hitbox[1] < block1.hitbox[1] + block1.hitbox[3] and man.hitbox[1] + man.hitbox[3] > block1.hitbox[1] : # man -> above the bottom of rect and below the top and if goblin is not dead
                 if man.hitbox[0] < block1.hitbox[0] + block1.hitbox[2] and man.hitbox[0] + man.hitbox[2] > block1.hitbox[0]:
@@ -258,7 +250,7 @@ while run:
             if bullet.x - bullet.rad < block1.hitbox[0] + block1.hitbox[2] and bullet.x + bullet.rad > block1.hitbox[0]:
                 bullets.pop(bullets.index(bullet))
                 
-        if bullet.x >0 and bullet.x < 500:
+        if bullet.x >0 and bullet.x < 700:
             bullet.x += bullet.vel
         else:
             bullets.pop(bullets.index(bullet))      #if bullets out of screen pop bullets that are created
@@ -291,7 +283,7 @@ while run:
         man.right=False
         man.standing=False
 
-    elif keys[pygame.K_RIGHT] and man.x <= 500 - man.w - man.vel:
+    elif keys[pygame.K_RIGHT] and man.x <= 700 - man.w - man.vel:
         if man.hitbox[0] >= block1.hitbox[0] + block1.hitbox[2] :
             man.x += man.vel
             man.y = 410
@@ -340,14 +332,21 @@ while run:
             man.isJump= False
             man.jumpCount=10
 
-    if man.x == 500 - man.w - man.vel  and not(goblin.visible):
-        man.decide(1)
-    elif score==-15:
-        man.decide(0)
-    else:
-        pass
 
     redrawGameWindow()
+    i=0
+    if score <= -15:
+        while i<300:
+            pygame.time.delay(10)
+            i+=1
+        break #call main menu
+    if not(goblin.visible) and man.x >= 600 and man.y == 410:
+        i=0
+        while i<300:
+            pygame.time.delay(10)
+            i+=1
+        break #call main menu
+    
  
 
 pygame.quit()
